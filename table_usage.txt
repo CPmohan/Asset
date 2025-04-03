@@ -1,0 +1,15 @@
+const header = ["User ID", "Name", "Email Id"];
+const fields = ["user_id", "name", "email_id"];
+const [sessionPreview, setSessionPreview] = useState(null);
+const [sessions, setSessions] = useState([]);
+
+
+<DataTable
+    align="left"
+    title="Assessment Session"
+    description="Find the active asssessment session"
+    data={sessions}
+    headers={header}
+    fields={fields}
+    onAction={handleOnAction}
+/>
