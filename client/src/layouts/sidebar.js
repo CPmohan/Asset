@@ -1,43 +1,58 @@
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/img/logo.png";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import IconButton from "../compounds/iconButton"; // Assuming you have this custom button
 
 function AppSidebar(props) {
+  const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
+
   return (
     <div
-      className={`${
-        props.open ? "fixed left-0 z-20 shadow-lg" : "hidden"
-      } w-max w-25 min-w-25 bg-secondary transition-left duration-300 overflow-auto flex flex-col items-center p-5 md:flex md:relative`}
+      className={`h-screen bg-secondary text-white ${
+        isOpen ? "w-30" : "w-20"
+      } transition-all duration-300 p-4`}
     >
-      <img width={40} src={Logo} alt="logo" />
+      {/* Sidebar Toggle Button */}
+      <button onClick={() => setIsOpen(!isOpen)} className="mb-4">
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-      <div className={`${props.open ? "pt-5" : ""} flex-1 flex flex-col items-center justify-center gap-8`}>
-        {props.menu.map(
-          (menu, i) =>
-            menu.menu && (
-              <div
-                key={i}
-                onClick={() => {
-                  navigate(menu.path);
-                  props.onSelectMenu(menu.id);
-                  props.handleSideBar();
-                }}
-                className={`group flex gap-2 items-center p-2 pb-1 rounded-lg cursor-pointer hover:bg-primary hover:text-white ${
-                  props.selectedmenu === menu.id
-                    ? "bg-primary text-white"
-                    : "text-iconColor"
-                }`}
-              >
-                <i className={"bx " + menu.icon} style={{ fontSize: 28 }}></i>
-                <h2
-                  className={`hidden z-50	fixed ml-[25px] mb-1 p-2 pl-3 pt-2 rounded-lg bg-primary group-hover:block`}
-                >
-                  {menu.name}
-                </h2>
-              </div>
-            )
-        )}
+      {/* Logo */}
+      <div className="flex justify-center mb-6">
+        <img width={40} src={Logo} alt="logo"/>
       </div>
+
+      {/* Navigation */}
+      <nav>
+        <ul className="space-y-3">
+          <li>
+            <IconButton
+              onClick={() => {
+                navigate("/");
+                props.onHomeClick && props.onHomeClick(); // ← Trigger reset from Home icon
+              }}
+              icon="bx-home"
+              label={isOpen ? "Home" : ""}
+            />
+          </li>
+          <li>
+            <IconButton
+              onClick={() => navigate("/settings")}
+              icon="bx-cog"
+              label={isOpen ? "Settings" : ""}
+            />
+          </li>
+          <li>
+            <IconButton
+              onClick={() => navigate("/profile")}
+              icon="bx-user"
+              label={isOpen ? "Profile" : ""}
+            />
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }

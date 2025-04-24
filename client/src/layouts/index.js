@@ -14,10 +14,20 @@ function AppContent() {
       name: "",
       path: "/",
     },
+    {
+      element: "AddAssetModal",
+      icon: "bxs-dashboard",
+      id: 2,
+      menu: false,
+      name: "",
+      path: "/create-new-asset",
+    },
   ];
-  const [selectedMenu, setSelectedMenu] = useState(0);
 
+  const [selectedMenu, setSelectedMenu] = useState(0);
   const [sidebarState, setSideBarState] = useState(false);
+  const [resetGroupView, setResetGroupView] = useState(false);
+
   const handleSideBar = () => {
     setSideBarState(!sidebarState);
   };
@@ -30,10 +40,11 @@ function AppContent() {
         menu={menus || []}
         selectedmenu={selectedMenu}
         onSelectMenu={setSelectedMenu}
+        onHomeClick={() => setResetGroupView(true)}
       />
 
       <div className="flex-1 flex flex-col h-screen w-full overflow-auto">
-        <div className="w-full bg-white p-3 h-18 flex items-center justify-between drop-shadow-sm	z-50">
+        <div className="w-full bg-white p-3 h-18 flex items-center justify-between drop-shadow-sm z-50">
           <div className="flex gap-5 items-center">
             <i
               onClick={handleSideBar}
@@ -60,10 +71,33 @@ function AppContent() {
                   <Route
                     key={menu.path}
                     path={menu.path}
-                    element={<Component />}
+                    element={
+                      <Component
+                        resetGroupView={resetGroupView}
+                        onResetComplete={() => setResetGroupView(false)}
+                      />
+                    }
                   />
                 );
               })}
+
+              {/* New updated nested asset route */}
+              <Route
+                path="/group/:group/:name"
+                element={<routes.AssetDetail />}
+              />
+
+              {/* Group view */}
+              <Route
+                path="/group/:group"
+                element={
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <routes.GroupAssetDetail />
+                  </Suspense>
+                }
+              />
+
+              {/* Fallback 404 */}
               <Route
                 path="*"
                 element={

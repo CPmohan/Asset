@@ -2,7 +2,9 @@ import './style.css'
 
 function BasicsTable(props) {
     return <table className='basics-table overflow-auto' style={{ width: "100%" }}>
+        
         <thead>
+            
             <tr>
                 {props.sno && <th>S. No</th>}
                 {

@@ -4,6 +4,8 @@ import InputBox from "../input";
 import "./style.css";
 import * as XLSX from "xlsx";
 
+
+
 function DataTable(props) {
   const [isFilter, setIsFilter] = useState(false);
   const [filters, setFilters] = useState({});
@@ -42,26 +44,27 @@ function DataTable(props) {
   const handleDownload = () => {
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, props.title);
-    XLSX.writeFile(workbook, `${props.title}.xlsx`, { compression: true });
+    XLSX.utils.book_append_sheet(workbook, worksheet, props.title || "Data");
+    XLSX.writeFile(workbook, `${props.title || "data"}.xlsx`, {
+      compression: true,
+    });
   };
 
   const handleRowsPerPageChange = (e) => {
     setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page on rows per page change
+    setCurrentPage(1);
   };
 
   const filteredData = data.filter((row) => {
     return Object.keys(filters).every((column) => {
-      return String(row[column])
+      return String(row[column] ?? "")
         .toLowerCase()
-        .includes(filters[column].toLowerCase());
+        .includes((filters[column] ?? "").toLowerCase());
     });
   });
 
   const sortedData = filteredData.sort((a, b) => {
     if (!sortConfig) return 0;
-
     const { key, direction } = sortConfig;
     if (a[key] < b[key]) return direction === "ascending" ? -1 : 1;
     if (a[key] > b[key]) return direction === "ascending" ? 1 : -1;
@@ -104,7 +107,7 @@ function DataTable(props) {
             )}
             {props.secButton && (
               <CustomButton
-                label={props.secBtnLabel}
+                label={props.secBtnLabel || "Add New Asset"}
                 onClick={props.secButton}
               />
             )}
@@ -114,6 +117,7 @@ function DataTable(props) {
           </div>
         </div>
       )}
+
       <div className="p-5">
         <div className="flex items-center justify-between">
           <div className="flex w-110 items-center gap-3">
@@ -138,7 +142,7 @@ function DataTable(props) {
               )}
               {props.secButton && (
                 <CustomButton
-                  label={props.secBtnLabel}
+                  label={props.secBtnLabel || "Add New Asset"}
                   onClick={props.secButton}
                 />
               )}
@@ -182,7 +186,9 @@ function DataTable(props) {
                         type="text"
                         placeholder={`Filter ${column}`}
                         value={filters[props.fields[i]] || ""}
-                        onChange={(e) => handleFilterChange(e, props.fields[i])}
+                        onChange={(e) =>
+                          handleFilterChange(e, props.fields[i])
+                        }
                         className="w-full mt-2 text-sm outline-none p-2 mb-1 rounded font-medium"
                       />
                     )}
@@ -195,7 +201,13 @@ function DataTable(props) {
                 <tr
                   className="cursor-pointer"
                   key={index}
-                  onClick={props.onAction ? () => props.onAction(row) : null}
+                  onClick={
+                    row.onClick
+                      ? () => row.onClick()
+                      : props.onAction
+                      ? () => props.onAction(row)
+                      : undefined
+                  }
                 >
                   <td style={{ textAlign: props.align }}>
                     {indexOfFirstRow + index + 1}
@@ -220,6 +232,7 @@ function DataTable(props) {
             </tbody>
           </table>
         </div>
+
         <div className="flex justify-between items-center mt-4">
           <span>
             Page {totalPages === 0 ? 0 : currentPage} of {totalPages}
