@@ -171,6 +171,7 @@ const AddAssetPage = () => {
               { value: "TRANSPORT", label: "Transport" },
               { value: "ELECTRONICS", label: "Electronics" },
               { value: "LABORATORY", label: "Laboratory" },
+              { value: "SPORTS", label: "Sports" },
             ]}
             placeholder="Select a Group"
             width="100%"

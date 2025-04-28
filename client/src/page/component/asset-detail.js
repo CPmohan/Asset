@@ -5,23 +5,28 @@ import axios from "axios";
 
 const AssetDetail = () => {
   const { state } = useLocation();
-  const { groupName, assetName } = useParams();
+  // const { groupName, assetName } = useParams();
+  const { group: groupName, name: assetName } = useParams();
+
   const [asset, setAsset] = useState(null);
 
   useEffect(() => {
-    if (state) {
-      setAsset(state);
-    } else {
-      axios
-        .get(`/api/assets/${groupName}/${assetName}`)
-        .then((res) => {
-          console.log("API Response:", res.data);
-          setAsset(res.data);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch asset:", err);
-        });
-    }
+    // if (state) {
+    //   console.log("State files:", state.files);
+    //   setAsset(state);
+    // } else {
+    axios
+      .get(`http://localhost:8080/api/assets/${groupName}/${assetName}`)
+      .then((res) => {
+        // console.log("Raw API Response files:", res.data.files);
+        setAsset(res.data);
+        // console.log("data fetched")
+      })
+      .catch((err) => {
+        // console.error("Failed to fetch asset:", err);
+
+      });
+    // }
   }, [state, groupName, assetName]);
 
   if (!asset) return <div className="p-4">Loading...</div>;
@@ -30,14 +35,14 @@ const AssetDetail = () => {
     if (!asset.files || asset.files.length === 0) {
       return <p className="text-gray-500 text-sm italic">No files uploaded yet.</p>;
     }
-  
+
     return (
       <ul className="list-disc list-inside text-sm">
         {asset.files.map((f, index) => {
           const fileName = f.filename || "Unnamed File";
           const fileType = f.type || "Unknown";
-          const fileUrl = f.fileUrl || ""; // Use the fileUrl from the API response
-  
+          const fileUrl = f.fileUrl || "";
+
           return (
             <li key={index}>
               {fileUrl ? (
@@ -58,7 +63,6 @@ const AssetDetail = () => {
       </ul>
     );
   };
-  
   return (
     <div style={{ padding: "1rem" }}>
       <div className="bg-white rounded-md p-6 w-full max-w-8xl min-h-[500px] flex flex-col lg:flex-row gap-6">
@@ -73,9 +77,8 @@ const AssetDetail = () => {
 
           <div className="mb-4">
             <p className="mb-1 font-medium text-black">Group</p>
-            <p className="text-gray-900">
-              {Array.isArray(asset.group) ? asset.group.join(", ") : asset.group}
-            </p>
+            <p className="text-gray-900">{groupName}</p>
+
           </div>
 
           <div className="mb-4">
@@ -86,6 +89,7 @@ const AssetDetail = () => {
           <div className="mt-4">
             <h3 className="text-md text-black mb-2">Uploaded Files</h3>
             <div className="border rounded-md bg-gray-50 p-3 min-h-[100px]">
+              <p className="text-gray-900">{asset.filename}</p>
               {renderFiles()}
             </div>
           </div>

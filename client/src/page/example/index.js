@@ -1,45 +1,51 @@
-import "compounds/tables/style.css";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect,  } from "react";
+import axios from "axios";
 import DataTable from "compounds/tables/data-table";
-
-const assetData = [
-  { name: "Computers", group: "Electronics", quantity: 50 },
-  { name: "Printers", group: "Electronics", quantity: 10 },
-  { name: "Buses", group: "Transport", quantity: 5 },
-  { name: "Buildings", group: "Infrastructure", quantity: 2 },
-  { name: "ROBOTS", group: "Laboratory", quantity: 2 },
-];
+import "compounds/tables/style.css";
 
 function BasicExample({ resetGroupView, onResetComplete }) {
   const navigate = useNavigate();
-  const groups = [...new Set(assetData.map((item) => item.group))];
+  const [assetData, setAssetData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Use the group-counts endpoint which already provides the data we need
+    axios.get("http://localhost:8080/api/group-counts")
+      .then((res) => {
+        setAssetData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch group counts:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (resetGroupView) {
+      onResetComplete();
+    }
+  }, [resetGroupView, onResetComplete]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   function handleClick() {
     navigate("/create-new-asset");
   }
 
-  // Optional: Resetting selected group view if needed
-  useEffect(() => {
-    if (resetGroupView) {
-      onResetComplete(); // Just clear the trigger now, since we navigate directly
-    }
-  }, [resetGroupView, onResetComplete]);
-
   return (
     <div style={{ padding: "1rem" }}>
       <DataTable
-      title="ALL ASSET GROUPS"
+        title="ALL ASSET GROUPS"
         headers={["Group", "Total Assets"]}
         fields={["group", "count"]}
-        data={groups.map((group) => ({
-          group,
-          count: assetData.filter((item) => item.group.includes(group)).length,
-
-          onClick: () =>
-            navigate(`/group/${group}`, {
-              state: { assetData: assetData.filter((a) => a.group === group) },
-            }),
+        data={assetData.map((item) => ({
+          group: item.group,
+          count: item.count,
+          onClick: () => navigate(`/group/${item.group}`)
         }))}
         rowClickEnabled={true}
         align="center"

@@ -391,3 +391,64 @@ func HandleGetAsset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(asset)
 }
+
+func HandleGetAssetByName(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Extract group and name
+	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/assets/"), "/")
+	if len(parts) != 2 {
+		http.Error(w, "Invalid path. Expected /api/assets/{group}/{name}", http.StatusBadRequest)
+		return
+	}
+	groupName := strings.ToLower(parts[0])
+	assetName := parts[1]
+
+	var asset AssetPayload
+	var assetID int
+
+	// Get asset basic info
+	query := `
+		SELECT a.id, a.name, a.quantity
+		FROM assets a
+		JOIN asset_groups ag ON a.id = ag.asset_id
+		WHERE LOWER(TRIM(ag.group_name)) = ? AND a.name = ?`
+
+	err := db.QueryRow(query, groupName, assetName).Scan(&assetID, &asset.Name, &asset.Quantity)
+	if err != nil {
+		http.Error(w, "Asset not found: "+err.Error(), http.StatusNotFound)
+		return
+	}
+
+	asset.Group = []string{groupName}
+
+	// Get files for the asset
+	fileQuery := `
+		SELECT filename, type, type_value
+		FROM uploaded_files
+		WHERE asset_id = ?`
+
+	fileRows, err := db.Query(fileQuery, assetID)
+	if err != nil {
+		http.Error(w, "Error fetching files: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer fileRows.Close()
+
+	for fileRows.Next() {
+		var file FileInfo
+		if err := fileRows.Scan(&file.Filename, &file.Type, &file.TypeValue); err != nil {
+			http.Error(w, "File scan error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		file.FileUrl = fmt.Sprintf("http://localhost:8080/uploads/%s", file.Filename)
+		asset.Files = append(asset.Files, file)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(asset)
+}

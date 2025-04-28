@@ -37,7 +37,7 @@ func main() {
 		// Route for getting single asset details
 		parts := strings.Split(path, "/")
 		if len(parts) >= 5 && parts[3] != "group" {
-			handlers.HandleGetAsset(w, r)
+			handlers.HandleGetAssetByName(w, r)
 			return
 		}
 

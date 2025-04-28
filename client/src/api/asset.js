@@ -28,18 +28,15 @@ export const getAsset = async (groupName, assetName) => {
 
   return {
     ...data,
-    // JSON key from backend is "group" (array of strings)
     group: Array.isArray(data.group) && data.group.length > 0
       ? data.group[0]
       : "",
-    // JSON key from backend is "files" (array of objects)
     files: Array.isArray(data.files)
       ? data.files.map(file => ({
-          // use exactly the JSON field names
-          filename: file.filename,
-          type:     file.type,
-          typeValue:file.typeValue,
-          fileUrl:  file.fileUrl || `http://localhost:8080/uploads/${file.filename}`
+          filename: file.Filename,  // Note the capitalization
+          type: file.Type,
+          typeValue: file.TypeValue,
+          fileUrl: file.FileUrl || `http://localhost:8080/uploads/${file.Filename}`
         }))
       : []
   };
