@@ -36,7 +36,7 @@ var db *sql.DB
 
 func init() {
 	var err error
-	dsn := "root:Zeb2001@cp@tcp(127.0.0.1:3306)/asset_db"
+	dsn := "root:Your password@tcp(127.0.0.1:3306)/asset_db"
 
 	db, err = sql.Open("mysql", dsn)
 	if err != nil {
